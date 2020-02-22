@@ -10,6 +10,12 @@
  * Programador: Pedro Henrique Pires
  * Descrição: Implementação de métodos de consulta e por procedure
  */
+
+/*
+* Data: 22/02/2020
+* Programador: Pedro Henrique Pires
+* Descrição: Removendo connection string e recebendo por parametro
+*/
 #endregion
 
 
@@ -32,35 +38,35 @@ namespace DataBaseHelper
         /// <summary>
         /// Construtor
         /// </summary>
-        public ConexaoBanco()
+        internal ConexaoBanco(string pConnectionString)
         {
-            SqlTransaction = null;
-            SqlConnection = new SqlConnection(ConnectionString);
+            _SqlTransaction = null;
+            _ConnectionString = pConnectionString;
+            _SqlConnection = new SqlConnection(_ConnectionString);
         }
         #endregion
 
-        #region Constantes
+        #region Propriedades
+
         /// <summary>
         /// String de conexão
         /// </summary>
-        private const string ConnectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;Initial Catalog=Charmosa;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
-        #endregion
+        private readonly string _ConnectionString;
 
-        #region Propriedades
         /// <summary>
         /// Objeto de conexão
         /// </summary>
-        private SqlConnection SqlConnection { get; set; }
+        private SqlConnection _SqlConnection { get; set; }
 
         /// <summary>
         /// Objeto de comando
         /// </summary>
-        private SqlCommand SqlCommand { get; set; }
+        private SqlCommand _SqlCommand { get; set; }
 
         /// <summary>
         /// Objeto de transação
         /// </summary>
-        private SqlTransaction SqlTransaction { get; set; }
+        private SqlTransaction _SqlTransaction { get; set; }
         #endregion
 
         #region Métodos
@@ -68,58 +74,58 @@ namespace DataBaseHelper
         /// <summary>
         /// Abrir transação
         /// </summary>
-        public void BeginTransaction()
+        protected void BeginTransaction()
         {
-            SqlConnection.Open();
-            SqlTransaction = SqlConnection.BeginTransaction();
+            _SqlConnection.Open();
+            _SqlTransaction = _SqlConnection.BeginTransaction();
         }
 
         /// <summary>
         /// Realizar Commit
         /// </summary>
-        public void Commit()
+        protected void Commit()
         {
-            SqlTransaction.Commit();
-            SqlConnection.Close();
+            _SqlTransaction.Commit();
+            _SqlConnection.Close();
         }
 
         /// <summary>
         /// Realizar rollback
         /// </summary>
-        public void Rollback()
+        protected void Rollback()
         {
-            SqlTransaction.Rollback();
+            _SqlTransaction.Rollback();
         }
 
         /// <summary>
         /// Execute assincronamente
         /// </summary>
         /// <param name="pComando"></param>
-        public async void ExecutarAsync(string pComando)
+        protected async void ExecutarAsync(string pComando)
         {
             try
             {
-                if (SqlTransaction == null)
+                if (_SqlTransaction == null)
                 {
-                    using (SqlConnection)
+                    using (_SqlConnection)
                     {
                         MontarAmbienteExecucao(pComando, CommandType.Text);
 
-                        await SqlCommand.ExecuteNonQueryAsync();
+                        await _SqlCommand.ExecuteNonQueryAsync();
                     }
                 }
                 else
                 {
                     MontarAmbienteExecucao(pComando, CommandType.Text);
 
-                    await SqlCommand.ExecuteNonQueryAsync();
+                    await _SqlCommand.ExecuteNonQueryAsync();
                 }
             }
             catch
             {
-                if (SqlConnection.State == ConnectionState.Open)
+                if (_SqlConnection.State == ConnectionState.Open)
                 {
-                    SqlConnection.Close();
+                    _SqlConnection.Close();
                 }
             }
         }
@@ -128,31 +134,31 @@ namespace DataBaseHelper
         /// Executar
         /// </summary>
         /// <param name="pComando"></param>
-        public void Executar(string pComando)
+        protected void Executar(string pComando)
         {
             try
             {
-                if (SqlTransaction == null)
+                if (_SqlTransaction == null)
                 {
-                    using (SqlConnection)
+                    using (_SqlConnection)
                     {
                         MontarAmbienteExecucao(pComando, CommandType.Text);
 
-                        SqlCommand.ExecuteNonQuery();
+                        _SqlCommand.ExecuteNonQuery();
                     }
                 }
                 else
                 {
                     MontarAmbienteExecucao(pComando, CommandType.Text);
 
-                    SqlCommand.ExecuteNonQuery();
+                    _SqlCommand.ExecuteNonQuery();
                 }
             }
             catch
             {
-                if (SqlConnection.State == ConnectionState.Open)
+                if (_SqlConnection.State == ConnectionState.Open)
                 {
-                    SqlConnection.Close();
+                    _SqlConnection.Close();
                 }
             }
         }
@@ -162,35 +168,35 @@ namespace DataBaseHelper
         /// </summary>
         /// <param name="pNomeProcedure">Nome da procedure</param>
         /// <param name="objeto">Objeto</param>
-        public void ExecutarProcedure(string pNomeProcedure, object pObjeto)
+        protected void ExecutarProcedure(string pNomeProcedure, object pObjeto)
         {
             try
             {
-                if (SqlTransaction == null)
+                if (_SqlTransaction == null)
                 {
-                    using (SqlConnection)
+                    using (_SqlConnection)
                     {
                         MontarAmbienteExecucao(pNomeProcedure, CommandType.StoredProcedure);
 
-                        PreencheParametros(SqlCommand, pObjeto);
+                        PreencheParametros(_SqlCommand, pObjeto);
 
-                        SqlCommand.ExecuteNonQuery();
+                        _SqlCommand.ExecuteNonQuery();
                     }
                 }
                 else
                 {
                     MontarAmbienteExecucao(pNomeProcedure, CommandType.StoredProcedure);
 
-                    PreencheParametros(SqlCommand, pObjeto);
+                    PreencheParametros(_SqlCommand, pObjeto);
 
-                    SqlCommand.ExecuteNonQuery();
+                    _SqlCommand.ExecuteNonQuery();
                 }
             }
             catch
             {
-                if (SqlConnection.State == ConnectionState.Open)
+                if (_SqlConnection.State == ConnectionState.Open)
                 {
-                    SqlConnection.Close();
+                    _SqlConnection.Close();
                 }
             }
         }
@@ -200,35 +206,35 @@ namespace DataBaseHelper
         /// </summary>
         /// <param name="pNomeProcedure">Nome da procedure</param>
         /// <param name="objeto">Objeto</param>
-        public async void ExecutarProcedureAsync(string pNomeProcedure, object pObjeto)
+        protected async void ExecutarProcedureAsync(string pNomeProcedure, object pObjeto)
         {
             try
             {
-                if (SqlTransaction == null)
+                if (_SqlTransaction == null)
                 {
-                    using (SqlConnection)
+                    using (_SqlConnection)
                     {
                         MontarAmbienteExecucao(pNomeProcedure, CommandType.StoredProcedure);
 
-                        PreencheParametros(SqlCommand, pObjeto);
+                        PreencheParametros(_SqlCommand, pObjeto);
 
-                        await SqlCommand.ExecuteNonQueryAsync();
+                        await _SqlCommand.ExecuteNonQueryAsync();
                     }
                 }
                 else
                 {
                     MontarAmbienteExecucao(pNomeProcedure, CommandType.StoredProcedure);
 
-                    PreencheParametros(SqlCommand, pObjeto);
+                    PreencheParametros(_SqlCommand, pObjeto);
 
-                    await SqlCommand.ExecuteNonQueryAsync();
+                    await _SqlCommand.ExecuteNonQueryAsync();
                 }
             }
             catch
             {
-                if (SqlConnection.State == ConnectionState.Open)
+                if (_SqlConnection.State == ConnectionState.Open)
                 {
-                    SqlConnection.Close();
+                    _SqlConnection.Close();
                 }
             }
         }
@@ -238,7 +244,7 @@ namespace DataBaseHelper
         /// </summary>
         /// <param name="pNomeProcedure">Nome da procecure</param>
         /// <returns></returns>
-        public DataSet ConsultaPorProcedure(string pNomeProcedure) => ConsultaPorProcedure(pNomeProcedure, new { });
+        protected DataSet ConsultaPorProcedure(string pNomeProcedure) => ConsultaPorProcedure(pNomeProcedure, new { });
 
         /// <summary>
         /// Consulta um dataset
@@ -246,35 +252,35 @@ namespace DataBaseHelper
         /// <param name="pNomeProcedure">Nome da procecure</param>
         /// <param name="pObjeto">Objeto com os parametros</param>
         /// <returns></returns>
-        public DataSet ConsultaPorProcedure(string pNomeProcedure, object pObjeto)
+        protected DataSet ConsultaPorProcedure(string pNomeProcedure, object pObjeto)
         {
             DataSet dataRecords = new DataSet();
             try
             {
-                if (SqlTransaction == null)
+                if (_SqlTransaction == null)
                 {
-                    using (SqlConnection)
+                    using (_SqlConnection)
                     {
                         MontarAmbienteExecucao(pNomeProcedure, CommandType.StoredProcedure);
-                        PreencheParametros(SqlCommand, pObjeto);
+                        PreencheParametros(_SqlCommand, pObjeto);
 
-                        new SqlDataAdapter { SelectCommand = SqlCommand }.Fill(dataRecords);
+                        new SqlDataAdapter { SelectCommand = _SqlCommand }.Fill(dataRecords);
                     }
                 }
                 else
                 {
                     MontarAmbienteExecucao(pNomeProcedure, CommandType.StoredProcedure);
-                    PreencheParametros(SqlCommand, pObjeto);
+                    PreencheParametros(_SqlCommand, pObjeto);
 
-                    new SqlDataAdapter { SelectCommand = SqlCommand }.Fill(dataRecords);
+                    new SqlDataAdapter { SelectCommand = _SqlCommand }.Fill(dataRecords);
                 }
                 return dataRecords;
             }
             catch
             {
-                if (SqlConnection.State == ConnectionState.Open)
+                if (_SqlConnection.State == ConnectionState.Open)
                 {
-                    SqlConnection.Close();
+                    _SqlConnection.Close();
                 }
                 throw;
             }
@@ -285,33 +291,33 @@ namespace DataBaseHelper
         /// </summary>
         /// <param name="pComando"></param>
         /// <returns></returns>
-        public DataSet Consulta(string pComando)
+        protected DataSet Consulta(string pComando)
         {
             DataSet dataRecords = new DataSet();
             try
             {
-                if (SqlTransaction == null)
+                if (_SqlTransaction == null)
                 {
-                    using (SqlConnection)
+                    using (_SqlConnection)
                     {
                         MontarAmbienteExecucao(pComando, CommandType.Text);
 
-                        new SqlDataAdapter { SelectCommand = SqlCommand }.Fill(dataRecords);
+                        new SqlDataAdapter { SelectCommand = _SqlCommand }.Fill(dataRecords);
                     }
                 }
                 else
                 {
                     MontarAmbienteExecucao(pComando, CommandType.Text);
 
-                    new SqlDataAdapter { SelectCommand = SqlCommand }.Fill(dataRecords);
+                    new SqlDataAdapter { SelectCommand = _SqlCommand }.Fill(dataRecords);
                 }
                 return dataRecords;
             }
             catch
             {
-                if (SqlConnection.State == ConnectionState.Open)
+                if (_SqlConnection.State == ConnectionState.Open)
                 {
-                    SqlConnection.Close();
+                    _SqlConnection.Close();
                 }
                 throw;
             }
@@ -322,7 +328,7 @@ namespace DataBaseHelper
         /// </summary>
         /// <param name="pModel">Modelo</param>
         /// <returns></returns>
-        public StringBuilder MontaInsertPorAttributo(object pModel)
+        protected StringBuilder MontaInsertPorAttributo(object pModel)
         {
             StringBuilder strBuilder = new StringBuilder();
             return MontaInsertPorAttributo(pModel, ref strBuilder);
@@ -334,7 +340,84 @@ namespace DataBaseHelper
         /// <param name="pModel">Modelo</param>
         /// <param name="pStrBuilder">String Builder</param>
         /// <returns></returns>
-        public StringBuilder MontaInsertPorAttributo(object pModel, ref StringBuilder pStrBuilder) => MontaStringBuilderInsert(pModel, pStrBuilder);
+        protected StringBuilder MontaInsertPorAttributo(object pModel, ref StringBuilder pStrBuilder) => MontaStringBuilderInsert(pModel, pStrBuilder);
+
+        #endregion
+
+        #region Métodos privados
+
+        /// <summary>
+        /// Método que monta o ambiente para execução
+        /// </summary>
+        /// <param name="pComando"></param>
+        private void MontarAmbienteExecucao(string pComando, CommandType pCommandType)
+        {
+            if (_SqlConnection.State == ConnectionState.Closed)
+            {
+                _SqlConnection.Open();
+            }
+
+            _SqlCommand = new SqlCommand
+            {
+                CommandType = pCommandType,
+                CommandText = pComando,
+                Connection = _SqlConnection,
+            };
+
+            if (_SqlTransaction != null)
+            {
+                _SqlCommand.Transaction = _SqlTransaction;
+            }
+        }
+
+        /// <summary>
+        /// Monta o comando e os parametros
+        /// </summary>
+        /// <param name="sqlCommand">Objeto de sqlCommand</param>
+        /// <param name="objeto">Objeto que teram suas propriedades passadas para a procedure</param>
+        private void PreencheParametros(SqlCommand pSqlCommand, object pObjeto)
+        {
+            SqlCommandBuilder.DeriveParameters(_SqlCommand);
+
+            PropertyInfo[] propriedades = pObjeto.GetType().GetProperties();
+
+            for (int i = 1; i < _SqlCommand.Parameters.Count; i++)
+            {
+                object parametro = null;
+
+                var propriedade = propriedades[i - 1];
+
+                switch (propriedades[i - 1].PropertyType.Name)
+                {
+                    case "Boolean":
+                        parametro = Convert.ToBoolean(propriedade.GetValue(pObjeto)) ? 1 : 0;
+                        break;
+                    case "Byte":
+                        parametro = Convert.ToByte(propriedade.GetValue(pObjeto));
+                        break;
+                    case "DateTime":
+                        parametro = Convert.ToDateTime(propriedade.GetValue(pObjeto));
+                        break;
+                    case "Decimal":
+                        parametro = Convert.ToDecimal(propriedade.GetValue(pObjeto));
+                        break;
+                    case "Double":
+                        parametro = Convert.ToDouble(propriedade.GetValue(pObjeto));
+                        break;
+                    case "Int16":
+                    case "Int32":
+                    case "Int64":
+                        parametro = Convert.ToInt64(propriedade.GetValue(pObjeto));
+                        break;
+                    case "Char":
+                    case "String":
+                        parametro = propriedade.GetValue(pObjeto).ToString();
+                        break;
+                }
+
+                pSqlCommand.Parameters[i].Value = parametro;
+            }
+        }
 
         /// <summary>
         /// Monta o string builder para insert
@@ -394,84 +477,6 @@ namespace DataBaseHelper
         }
 
         #endregion
-
-
-        #region Métodos privados
-
-        /// <summary>
-        /// Método que monta o ambiente para execução
-        /// </summary>
-        /// <param name="pComando"></param>
-        private void MontarAmbienteExecucao(string pComando, CommandType pCommandType)
-        {
-            if (SqlConnection.State == ConnectionState.Closed)
-            {
-                SqlConnection.Open();
-            }
-
-            SqlCommand = new SqlCommand
-            {
-                CommandType = pCommandType,
-                CommandText = pComando,
-                Connection = SqlConnection,
-            };
-
-            if (SqlTransaction != null)
-            {
-                SqlCommand.Transaction = SqlTransaction;
-            }
-        }
-
-        /// <summary>
-        /// Monta o comando e os parametros
-        /// </summary>
-        /// <param name="sqlCommand">Objeto de sqlCommand</param>
-        /// <param name="objeto">Objeto que teram suas propriedades passadas para a procedure</param>
-        private void PreencheParametros(SqlCommand pSqlCommand, object pObjeto)
-        {
-            SqlCommandBuilder.DeriveParameters(SqlCommand);
-
-            PropertyInfo[] propriedades = pObjeto.GetType().GetProperties();
-
-            for (int i = 1; i < SqlCommand.Parameters.Count; i++)
-            {
-                object parametro = null;
-
-                var propriedade = propriedades[i - 1];
-
-                switch (propriedades[i - 1].PropertyType.Name)
-                {
-                    case "Boolean":
-                        parametro = Convert.ToBoolean(propriedade.GetValue(pObjeto)) ? 1 : 0;
-                        break;
-                    case "Byte":
-                        parametro = Convert.ToByte(propriedade.GetValue(pObjeto));
-                        break;
-                    case "DateTime":
-                        parametro = Convert.ToDateTime(propriedade.GetValue(pObjeto));
-                        break;
-                    case "Decimal":
-                        parametro = Convert.ToDecimal(propriedade.GetValue(pObjeto));
-                        break;
-                    case "Double":
-                        parametro = Convert.ToDouble(propriedade.GetValue(pObjeto));
-                        break;
-                    case "Int16":
-                    case "Int32":
-                    case "Int64":
-                        parametro = Convert.ToInt64(propriedade.GetValue(pObjeto));
-                        break;
-                    case "Char":
-                    case "String":
-                        parametro = propriedade.GetValue(pObjeto).ToString();
-                        break;
-                }
-
-                pSqlCommand.Parameters[i].Value = parametro;
-            }
-        }
-        #endregion
-
 
     }
 }
