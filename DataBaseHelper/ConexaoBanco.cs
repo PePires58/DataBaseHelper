@@ -16,6 +16,12 @@
 * Programador: Pedro Henrique Pires
 * Descrição: Removendo connection string e recebendo por parametro
 */
+
+/*
+ * Data: 23/02/2020
+ * Programador: Pedro Henrique Pires
+ * Descrição: Migração de métodos para UnitOfWork
+ */
 #endregion
 
 
@@ -32,7 +38,10 @@ using System.Threading.Tasks;
 
 namespace DataBaseHelper
 {
-    public class ConexaoBanco
+    /// <summary>
+    /// Classe de conexão com banco
+    /// </summary>
+    internal class ConexaoBanco
     {
         #region Construtores
         /// <summary>
@@ -56,7 +65,7 @@ namespace DataBaseHelper
         /// <summary>
         /// Objeto de conexão
         /// </summary>
-        private SqlConnection _SqlConnection { get; set; }
+        private readonly SqlConnection _SqlConnection;
 
         /// <summary>
         /// Objeto de comando
@@ -66,42 +75,16 @@ namespace DataBaseHelper
         /// <summary>
         /// Objeto de transação
         /// </summary>
-        private SqlTransaction _SqlTransaction { get; set; }
+        private readonly SqlTransaction _SqlTransaction;
         #endregion
 
         #region Métodos
 
         /// <summary>
-        /// Abrir transação
-        /// </summary>
-        protected void BeginTransaction()
-        {
-            _SqlConnection.Open();
-            _SqlTransaction = _SqlConnection.BeginTransaction();
-        }
-
-        /// <summary>
-        /// Realizar Commit
-        /// </summary>
-        protected void Commit()
-        {
-            _SqlTransaction.Commit();
-            _SqlConnection.Close();
-        }
-
-        /// <summary>
-        /// Realizar rollback
-        /// </summary>
-        protected void Rollback()
-        {
-            _SqlTransaction.Rollback();
-        }
-
-        /// <summary>
         /// Execute assincronamente
         /// </summary>
         /// <param name="pComando"></param>
-        protected async void ExecutarAsync(string pComando)
+        internal async void ExecutarAsync(string pComando)
         {
             try
             {
@@ -134,7 +117,7 @@ namespace DataBaseHelper
         /// Executar
         /// </summary>
         /// <param name="pComando"></param>
-        protected void Executar(string pComando)
+        internal void Executar(string pComando)
         {
             try
             {
@@ -168,7 +151,7 @@ namespace DataBaseHelper
         /// </summary>
         /// <param name="pNomeProcedure">Nome da procedure</param>
         /// <param name="objeto">Objeto</param>
-        protected void ExecutarProcedure(string pNomeProcedure, object pObjeto)
+        internal void ExecutarProcedure(string pNomeProcedure, object pObjeto)
         {
             try
             {
@@ -206,7 +189,7 @@ namespace DataBaseHelper
         /// </summary>
         /// <param name="pNomeProcedure">Nome da procedure</param>
         /// <param name="objeto">Objeto</param>
-        protected async void ExecutarProcedureAsync(string pNomeProcedure, object pObjeto)
+        internal async void ExecutarProcedureAsync(string pNomeProcedure, object pObjeto)
         {
             try
             {
@@ -244,7 +227,7 @@ namespace DataBaseHelper
         /// </summary>
         /// <param name="pNomeProcedure">Nome da procecure</param>
         /// <returns></returns>
-        protected DataSet ConsultaPorProcedure(string pNomeProcedure) => ConsultaPorProcedure(pNomeProcedure, new { });
+        internal DataSet ConsultaPorProcedure(string pNomeProcedure) => ConsultaPorProcedure(pNomeProcedure, new { });
 
         /// <summary>
         /// Consulta um dataset
@@ -252,7 +235,7 @@ namespace DataBaseHelper
         /// <param name="pNomeProcedure">Nome da procecure</param>
         /// <param name="pObjeto">Objeto com os parametros</param>
         /// <returns></returns>
-        protected DataSet ConsultaPorProcedure(string pNomeProcedure, object pObjeto)
+        internal DataSet ConsultaPorProcedure(string pNomeProcedure, object pObjeto)
         {
             DataSet dataRecords = new DataSet();
             try
@@ -291,7 +274,7 @@ namespace DataBaseHelper
         /// </summary>
         /// <param name="pComando"></param>
         /// <returns></returns>
-        protected DataSet Consulta(string pComando)
+        internal DataSet Consulta(string pComando)
         {
             DataSet dataRecords = new DataSet();
             try
@@ -328,7 +311,7 @@ namespace DataBaseHelper
         /// </summary>
         /// <param name="pModel">Modelo</param>
         /// <returns></returns>
-        protected StringBuilder MontaInsertPorAttributo(object pModel)
+        internal StringBuilder MontaInsertPorAttributo(object pModel)
         {
             StringBuilder strBuilder = new StringBuilder();
             return MontaInsertPorAttributo(pModel, ref strBuilder);
@@ -340,7 +323,7 @@ namespace DataBaseHelper
         /// <param name="pModel">Modelo</param>
         /// <param name="pStrBuilder">String Builder</param>
         /// <returns></returns>
-        protected StringBuilder MontaInsertPorAttributo(object pModel, ref StringBuilder pStrBuilder) => MontaStringBuilderInsert(pModel, pStrBuilder);
+        internal StringBuilder MontaInsertPorAttributo(object pModel, ref StringBuilder pStrBuilder) => MontaStringBuilderInsert(pModel, pStrBuilder);
 
         #endregion
 
