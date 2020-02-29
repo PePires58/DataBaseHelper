@@ -10,6 +10,12 @@
 * Programador: Pedro Henrique Pires
 * Descrição: Removido herança e migrado métodos da classe de conexão banco
 */
+
+/*
+Data: 29/02/2020
+Programador: Pedro Henrique Pires
+Descrição: Refatoração da classe.
+*/
 #endregion
 using DataBaseHelper.Interfaces;
 using System.Data;
@@ -26,20 +32,12 @@ namespace DataBaseHelper
     {
         #region Propriedades
 
-        /// <summary>
-        /// Classe que conexão de banco
-        /// </summary>
-        private readonly ConexaoBanco _ConexaoBanco;
+        private ICommandHelper _CommandHelper { get; set; }
 
         /// <summary>
         /// Objeto de conexão
         /// </summary>
         private SqlConnection _SqlConnection { get; set; }
-
-        /// <summary>
-        /// Objeto de comando
-        /// </summary>
-        private SqlCommand _SqlCommand { get; set; }
 
         /// <summary>
         /// Objeto de transação
@@ -55,7 +53,9 @@ namespace DataBaseHelper
         /// <param name="pConnectionString"></param>
         public UnitOfWork(string pConnectionString)
         {
-            _ConexaoBanco = new ConexaoBanco(pConnectionString);
+            _SqlTransaction = null;
+            _SqlConnection = new SqlConnection(pConnectionString);
+            _CommandHelper = new CommandHelper();
         }
         #endregion
 
@@ -93,7 +93,7 @@ namespace DataBaseHelper
         /// <param name="pComando"></param>
         async void IUnitOfWork.ExecutarAsync(string pComando)
         {
-            await Task.Run(() => _ConexaoBanco.ExecutarAsync(pComando));
+            await Task.Run(() => new ConexaoBanco(_SqlTransaction,_SqlConnection).ExecutarAsync(pComando));
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace DataBaseHelper
         /// <param name="pComando"></param>
         void IUnitOfWork.Executar(string pComando)
         {
-            _ConexaoBanco.Executar(pComando);
+            new ConexaoBanco(_SqlTransaction, _SqlConnection).Executar(pComando);
         }
 
         /// <summary>
@@ -112,7 +112,16 @@ namespace DataBaseHelper
         /// <param name="objeto">Objeto</param>
         void IUnitOfWork.ExecutarProcedure(string pNomeProcedure, object pObjeto)
         {
-            _ConexaoBanco.ExecutarProcedure(pNomeProcedure, pObjeto);
+            new ConexaoBanco(_SqlTransaction, _SqlConnection).ExecutarProcedure(pNomeProcedure, pObjeto);
+        }
+
+        /// <summary>
+        /// Executa a procedure assincronamente
+        /// </summary>
+        /// <param name="pNomeProcedure">Nome da procedure</param>
+        async void IUnitOfWork.ExecutarProcedureAsync(string pNomeProcedure)
+        {
+            await Task.Run(() => new ConexaoBanco(_SqlTransaction, _SqlConnection).ExecutarProcedureAsync(pNomeProcedure, new { }));
         }
 
         /// <summary>
@@ -122,7 +131,7 @@ namespace DataBaseHelper
         /// <param name="objeto">Objeto</param>
         async void IUnitOfWork.ExecutarProcedureAsync(string pNomeProcedure, object pObjeto)
         {
-            await Task.Run(() => _ConexaoBanco.ExecutarProcedureAsync(pNomeProcedure, pObjeto));
+            await Task.Run(() => new ConexaoBanco(_SqlTransaction, _SqlConnection).ExecutarProcedureAsync(pNomeProcedure, pObjeto));
         }
 
         /// <summary>
@@ -130,7 +139,7 @@ namespace DataBaseHelper
         /// </summary>
         /// <param name="pNomeProcedure">Nome da procecure</param>
         /// <returns></returns>
-        DataSet IUnitOfWork.ConsultaPorProcedure(string pNomeProcedure) => _ConexaoBanco.ConsultaPorProcedure(pNomeProcedure);
+        DataSet IUnitOfWork.ConsultaPorProcedure(string pNomeProcedure) => new ConexaoBanco(_SqlTransaction, _SqlConnection).ConsultaPorProcedure(pNomeProcedure);
         
         /// <summary>
         /// Consulta um dataset
@@ -138,14 +147,14 @@ namespace DataBaseHelper
         /// <param name="pNomeProcedure">Nome da procecure</param>
         /// <param name="pObjeto">Objeto com os parametros</param>
         /// <returns></returns>
-        DataSet IUnitOfWork.ConsultaPorProcedure(string pNomeProcedure, object pObjeto) => _ConexaoBanco.ConsultaPorProcedure(pNomeProcedure, pObjeto);
+        DataSet IUnitOfWork.ConsultaPorProcedure(string pNomeProcedure, object pObjeto) => new ConexaoBanco(_SqlTransaction, _SqlConnection).ConsultaPorProcedure(pNomeProcedure, pObjeto);
 
         /// <summary>
         /// Consulta um DataSet
         /// </summary>
         /// <param name="pComando"></param>
         /// <returns></returns>
-        DataSet IUnitOfWork.Consulta(string pComando) => _ConexaoBanco.Consulta(pComando);
+        DataSet IUnitOfWork.Consulta(string pComando) => new ConexaoBanco(_SqlTransaction, _SqlConnection).Consulta(pComando);
 
         /// <summary>
         /// Monta a instrução de Inserção no banco a partir do objeto com os atributos
@@ -153,7 +162,7 @@ namespace DataBaseHelper
         /// <param name="pModel">Modelo</param>
         /// <returns></returns>
         StringBuilder IUnitOfWork.MontaInsertPorAttributo(object pModel) =>
-            _ConexaoBanco.MontaInsertPorAttributo(pModel);
+            _CommandHelper.MontaInsertPorAttributo(pModel);
 
         /// <summary>
         /// Monta a instrução de Inserção no banco a partir do objeto com os atributos
@@ -162,7 +171,7 @@ namespace DataBaseHelper
         /// <param name="pStrBuilder">String Builder</param>
         /// <returns></returns>
         StringBuilder IUnitOfWork.MontaInsertPorAttributo(object pModel, ref StringBuilder pStrBuilder) =>
-            _ConexaoBanco.MontaInsertPorAttributo(pModel, ref pStrBuilder);
+            _CommandHelper.MontaInsertPorAttributo(pModel, ref pStrBuilder);
 
         #endregion
     }

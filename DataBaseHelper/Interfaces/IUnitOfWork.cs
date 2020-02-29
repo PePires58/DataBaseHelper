@@ -4,6 +4,12 @@
  Programador: Pedro Henrique Pires
  Descrição: Implementação Inicial da classe.
  */
+
+/*
+Data: 29/02/2020
+Programador: Pedro Henrique Pires
+Descrição: Inclusão de método de executar procedure.
+*/
 #endregion
 using System;
 using System.Collections.Generic;
@@ -50,6 +56,13 @@ namespace DataBaseHelper.Interfaces
         /// <param name="objeto">Objeto</param>
         void ExecutarProcedure(string pNomeProcedure, object pObjeto);
 
+
+        /// <summary>
+        /// Executa a procedure assincronamente
+        /// </summary>
+        /// <param name="pNomeProcedure">Nome da procedure</param>
+        /// <param name="objeto">Objeto</param>
+        void ExecutarProcedureAsync(string pNomeProcedure);
 
         /// <summary>
         /// Executa a procedure assincronamente

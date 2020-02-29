@@ -22,19 +22,19 @@
  * Programador: Pedro Henrique Pires
  * Descrição: Migração de métodos para UnitOfWork
  */
+
+/*
+Data: 29/02/2020
+Programador: Pedro Henrique Pires
+Descrição: Refatoração da classe.
+*/
 #endregion
 
 
-using DataBaseHelper.Atributos;
-using DataBaseHelper.Models;
-using ModulosHelper.Extensions;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataBaseHelper
 {
@@ -47,20 +47,14 @@ namespace DataBaseHelper
         /// <summary>
         /// Construtor
         /// </summary>
-        internal ConexaoBanco(string pConnectionString)
+        internal ConexaoBanco(SqlTransaction pSqlTransaciton, SqlConnection pSqlConnection)
         {
-            _SqlTransaction = null;
-            _ConnectionString = pConnectionString;
-            _SqlConnection = new SqlConnection(_ConnectionString);
+            _SqlTransaction = pSqlTransaciton;
+            _SqlConnection = pSqlConnection;
         }
         #endregion
 
         #region Propriedades
-
-        /// <summary>
-        /// String de conexão
-        /// </summary>
-        private readonly string _ConnectionString;
 
         /// <summary>
         /// Objeto de conexão
@@ -110,6 +104,7 @@ namespace DataBaseHelper
                 {
                     _SqlConnection.Close();
                 }
+                throw;
             }
         }
 
@@ -143,6 +138,7 @@ namespace DataBaseHelper
                 {
                     _SqlConnection.Close();
                 }
+                throw;
             }
         }
 
@@ -181,6 +177,7 @@ namespace DataBaseHelper
                 {
                     _SqlConnection.Close();
                 }
+                throw;
             }
         }
 
@@ -219,6 +216,7 @@ namespace DataBaseHelper
                 {
                     _SqlConnection.Close();
                 }
+                throw;
             }
         }
 
@@ -306,25 +304,7 @@ namespace DataBaseHelper
             }
         }
 
-        /// <summary>
-        /// Monta a instrução de Inserção no banco a partir do objeto com os atributos
-        /// </summary>
-        /// <param name="pModel">Modelo</param>
-        /// <returns></returns>
-        internal StringBuilder MontaInsertPorAttributo(object pModel)
-        {
-            StringBuilder strBuilder = new StringBuilder();
-            return MontaInsertPorAttributo(pModel, ref strBuilder);
-        }
-
-        /// <summary>
-        /// Monta a instrução de Inserção no banco a partir do objeto com os atributos
-        /// </summary>
-        /// <param name="pModel">Modelo</param>
-        /// <param name="pStrBuilder">String Builder</param>
-        /// <returns></returns>
-        internal StringBuilder MontaInsertPorAttributo(object pModel, ref StringBuilder pStrBuilder) => MontaStringBuilderInsert(pModel, pStrBuilder);
-
+       
         #endregion
 
         #region Métodos privados
@@ -400,63 +380,6 @@ namespace DataBaseHelper
 
                 pSqlCommand.Parameters[i].Value = parametro;
             }
-        }
-
-        /// <summary>
-        /// Monta o string builder para insert
-        /// </summary>
-        /// <param name="pModel"></param>
-        /// <param name="pStrBuilder"></param>
-        /// <returns></returns>
-        private static StringBuilder MontaStringBuilderInsert(object pModel, StringBuilder pStrBuilder)
-        {
-            PropertyInfo[] propriedades = pModel.GetType().GetProperties();
-
-            var colunaModel = new List<ColunaModel>();
-
-            if (pModel.GetType().GetCustomAttribute(typeof(TabelaAttribute)) is TabelaAttribute pTabela)
-            {
-
-                foreach (PropertyInfo propertyInfo in propriedades)
-                    if (propertyInfo.GetCustomAttribute(typeof(ColunaAttribute)) is ColunaAttribute pColuna)
-                        colunaModel.Add(new ColunaModel()
-                        {
-                            NomeColuna = pColuna.NomeColuna,
-                            TipoDadoBanco = pColuna.TipoDado,
-                            ValorCampo = propertyInfo.GetValue(pModel)
-                        });
-
-                pStrBuilder.Append($"INSERT INTO {(pTabela.Temporaria ? "#" : "")}{pTabela.NomeTabela}(");
-
-                for (int i = 0; i < colunaModel.Count; i++)
-                    pStrBuilder.AppendLine($"{colunaModel[i].NomeColuna} {(i == colunaModel.Count - 1 ? ")" : ",")}");
-
-                pStrBuilder.AppendLine("VALUES(");
-
-                for (int i = 0; i < colunaModel.Count; i++)
-                    switch (colunaModel[i].TipoDadoBanco)
-                    {
-                        case Enumerados.TipoDadosBanco.Char:
-                        case Enumerados.TipoDadosBanco.Varchar:
-                            pStrBuilder.AppendLine($"'{colunaModel[i].ValorCampo.ToString()}'{(i == colunaModel.Count - 1 ? ")" : ",")}");
-                            break;
-                        case Enumerados.TipoDadosBanco.Tinyint:
-                        case Enumerados.TipoDadosBanco.Integer:
-                        case Enumerados.TipoDadosBanco.BigInt:
-                            pStrBuilder.AppendLine($"{Convert.ToInt64(colunaModel[i].ValorCampo)}{(i == colunaModel.Count - 1 ? ")" : ",")}");
-                            break;
-                        case Enumerados.TipoDadosBanco.Enum:
-                            pStrBuilder.AppendLine($"'{((Enum)colunaModel[i].ValorCampo).GetDefaultValue()}'{(i == colunaModel.Count - 1 ? ")" : ",")}");
-                            break;
-                        case Enumerados.TipoDadosBanco.Float:
-                            pStrBuilder.AppendLine($"{Convert.ToDouble(colunaModel[i].ValorCampo)}{(i == colunaModel.Count - 1 ? ")" : ",")}");
-                            break;
-                        case Enumerados.TipoDadosBanco.Byte:
-                            pStrBuilder.AppendLine($"{(Convert.ToBoolean(colunaModel[i].ValorCampo) ? 1 : 0)}{(i == colunaModel.Count - 1 ? ")" : ",")}");
-                            break;
-                    }
-            }
-            return pStrBuilder;
         }
 
         #endregion

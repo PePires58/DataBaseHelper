@@ -4,6 +4,12 @@
  Programador: Pedro Henrique Pires
  Descrição: Implementação Inicial da classe.
  */
+
+/*
+Data: 29/02/2020
+Programador: Pedro Henrique Pires
+Descrição: Inclusão de campo de tamanho de campo.
+*/
 #endregion
 
 using DataBaseHelper.Enumerados;
@@ -15,7 +21,6 @@ namespace DataBaseHelper.Models
     /// </summary>
     internal class ColunaModel
     {
-
         #region Propriedades
 
         /// <summary>
@@ -33,6 +38,12 @@ namespace DataBaseHelper.Models
         /// Valor do campo
         /// </summary>
         internal object ValorCampo { get; set; }
+
+        /// <summary>
+        /// Tamanho do campo
+        /// </summary>
+        internal int TamanhoCampo { get; set; }
+
         #endregion
     }
 }
