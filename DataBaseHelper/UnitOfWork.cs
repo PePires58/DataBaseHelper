@@ -32,6 +32,9 @@ namespace DataBaseHelper
     {
         #region Propriedades
 
+        /// <summary>
+        /// Commandos helper
+        /// </summary>
         private ICommandHelper _CommandHelper { get; set; }
 
         /// <summary>

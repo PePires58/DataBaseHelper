@@ -4,6 +4,12 @@
  Programador: Pedro Henrique Pires
  Descrição: Implementação Inicial da classe.
  */
+
+/*
+Data: 30/03/2020
+Programador: Pedro Henrique Pires
+Descrição: Inclusão de campos de data.
+*/
 #endregion
 
 
@@ -18,6 +24,8 @@ namespace DataBaseHelper.Enumerados
         BigInt,
         Float,
         Byte,
-        Enum
+        Enum,
+        Smalldatetime,
+        Datetime
     }
 }

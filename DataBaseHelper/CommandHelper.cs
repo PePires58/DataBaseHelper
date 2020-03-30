@@ -4,6 +4,12 @@ Data: 29/02/2020
 Programador: Pedro Henrique Pires
 Descrição: Implementação Inicial.
 */
+
+/*
+Data: 30/03/2020
+Programador: Pedro Henrique Pires
+Descrição: Inclusão de campos de data.
+*/
 #endregion
 using DataBaseHelper.Atributos;
 using DataBaseHelper.Interfaces;
@@ -105,6 +111,14 @@ namespace DataBaseHelper
                         case Enumerados.TipoDadosBanco.Byte:
                             pStrBuilder.AppendLine($"DECLARE @{colunaModel[i].NomeColuna} TINYINT");
                             pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = {(Convert.ToBoolean(colunaModel[i].ValorCampo) ? 1 : 0)}");
+                            break;
+                        case Enumerados.TipoDadosBanco.Smalldatetime:
+                            pStrBuilder.AppendLine($"DECLARE @{colunaModel[i].NomeColuna} SMALLDATETIME");
+                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = '{Convert.ToDateTime(colunaModel[i].ValorCampo).ToString("yyyy-MM-dd")}' ");
+                            break;
+                        case Enumerados.TipoDadosBanco.Datetime:
+                            pStrBuilder.AppendLine($"DECLARE @{colunaModel[i].NomeColuna} DATETIME");
+                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = '{Convert.ToDateTime(colunaModel[i].ValorCampo).ToString("yyyy-MM-dd")}' ");
                             break;
                         default:
                             break;
