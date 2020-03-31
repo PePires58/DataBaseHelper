@@ -10,6 +10,12 @@ Data: 30/03/2020
 Programador: Pedro Henrique Pires
 Descrição: Inclusão de campos de data.
 */
+
+/*
+Data: 31/03/2020
+Programador: Pedro Henrique Pires
+Descrição: Inclusão de hora, minuto e segundo em campos de data.
+*/
 #endregion
 using DataBaseHelper.Atributos;
 using DataBaseHelper.Interfaces;
@@ -114,11 +120,11 @@ namespace DataBaseHelper
                             break;
                         case Enumerados.TipoDadosBanco.Smalldatetime:
                             pStrBuilder.AppendLine($"DECLARE @{colunaModel[i].NomeColuna} SMALLDATETIME");
-                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = '{Convert.ToDateTime(colunaModel[i].ValorCampo).ToString("yyyy-MM-dd")}' ");
+                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = '{Convert.ToDateTime(colunaModel[i].ValorCampo).ToString("yyyy-MM-dd HH:mm:ss")}' ");
                             break;
                         case Enumerados.TipoDadosBanco.Datetime:
                             pStrBuilder.AppendLine($"DECLARE @{colunaModel[i].NomeColuna} DATETIME");
-                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = '{Convert.ToDateTime(colunaModel[i].ValorCampo).ToString("yyyy-MM-dd")}' ");
+                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = '{Convert.ToDateTime(colunaModel[i].ValorCampo).ToString("yyyy-MM-dd HH:mm:ss")}' ");
                             break;
                         default:
                             break;

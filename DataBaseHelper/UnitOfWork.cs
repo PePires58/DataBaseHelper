@@ -46,6 +46,14 @@ namespace DataBaseHelper
         /// Objeto de transação
         /// </summary>
         private SqlTransaction _SqlTransaction { get; set; }
+
+        #endregion
+
+        #region Propriedades readonly
+        /// <summary>
+        /// String de conecção
+        /// </summary>
+        private string _connectionString;
         #endregion
 
         #region Construtores
@@ -58,6 +66,7 @@ namespace DataBaseHelper
         {
             _SqlTransaction = null;
             _SqlConnection = new SqlConnection(pConnectionString);
+            _connectionString = pConnectionString;
             _CommandHelper = new CommandHelper();
         }
         #endregion
@@ -96,6 +105,11 @@ namespace DataBaseHelper
         /// <param name="pComando"></param>
         async void IUnitOfWork.ExecutarAsync(string pComando)
         {
+            if (_SqlConnection.State == ConnectionState.Closed)
+            {
+                _SqlConnection = new SqlConnection(_connectionString);
+            }
+
             await Task.Run(() => new ConexaoBanco(_SqlTransaction,_SqlConnection).ExecutarAsync(pComando));
         }
 
@@ -105,6 +119,11 @@ namespace DataBaseHelper
         /// <param name="pComando"></param>
         void IUnitOfWork.Executar(string pComando)
         {
+            if (_SqlConnection.State == ConnectionState.Closed)
+            {
+                _SqlConnection = new SqlConnection(_connectionString);
+            }
+
             new ConexaoBanco(_SqlTransaction, _SqlConnection).Executar(pComando);
         }
 
@@ -115,6 +134,10 @@ namespace DataBaseHelper
         /// <param name="objeto">Objeto</param>
         void IUnitOfWork.ExecutarProcedure(string pNomeProcedure, object pObjeto)
         {
+            if (_SqlConnection.State == ConnectionState.Closed)
+            {
+                _SqlConnection = new SqlConnection(_connectionString);
+            }
             new ConexaoBanco(_SqlTransaction, _SqlConnection).ExecutarProcedure(pNomeProcedure, pObjeto);
         }
 
@@ -124,6 +147,11 @@ namespace DataBaseHelper
         /// <param name="pNomeProcedure">Nome da procedure</param>
         async void IUnitOfWork.ExecutarProcedureAsync(string pNomeProcedure)
         {
+            if (_SqlConnection.State == ConnectionState.Closed)
+            {
+                _SqlConnection = new SqlConnection(_connectionString);
+            }
+
             await Task.Run(() => new ConexaoBanco(_SqlTransaction, _SqlConnection).ExecutarProcedureAsync(pNomeProcedure, new { }));
         }
 
@@ -134,6 +162,11 @@ namespace DataBaseHelper
         /// <param name="objeto">Objeto</param>
         async void IUnitOfWork.ExecutarProcedureAsync(string pNomeProcedure, object pObjeto)
         {
+            if (_SqlConnection.State == ConnectionState.Closed)
+            {
+                _SqlConnection = new SqlConnection(_connectionString);
+            }
+
             await Task.Run(() => new ConexaoBanco(_SqlTransaction, _SqlConnection).ExecutarProcedureAsync(pNomeProcedure, pObjeto));
         }
 
@@ -142,22 +175,46 @@ namespace DataBaseHelper
         /// </summary>
         /// <param name="pNomeProcedure">Nome da procecure</param>
         /// <returns></returns>
-        DataSet IUnitOfWork.ConsultaPorProcedure(string pNomeProcedure) => new ConexaoBanco(_SqlTransaction, _SqlConnection).ConsultaPorProcedure(pNomeProcedure);
-        
+        DataSet IUnitOfWork.ConsultaPorProcedure(string pNomeProcedure)
+        {
+            if (_SqlConnection.State == ConnectionState.Closed)
+            {
+                _SqlConnection = new SqlConnection(_connectionString);
+            }
+
+            return new ConexaoBanco(_SqlTransaction, _SqlConnection).ConsultaPorProcedure(pNomeProcedure);
+        }
+
         /// <summary>
         /// Consulta um dataset
         /// </summary>
         /// <param name="pNomeProcedure">Nome da procecure</param>
         /// <param name="pObjeto">Objeto com os parametros</param>
         /// <returns></returns>
-        DataSet IUnitOfWork.ConsultaPorProcedure(string pNomeProcedure, object pObjeto) => new ConexaoBanco(_SqlTransaction, _SqlConnection).ConsultaPorProcedure(pNomeProcedure, pObjeto);
+        DataSet IUnitOfWork.ConsultaPorProcedure(string pNomeProcedure, object pObjeto)
+        {
+            if (_SqlConnection.State == ConnectionState.Closed)
+            {
+                _SqlConnection = new SqlConnection(_connectionString);
+            }
+
+            return new ConexaoBanco(_SqlTransaction, _SqlConnection).ConsultaPorProcedure(pNomeProcedure, pObjeto);
+        }
 
         /// <summary>
         /// Consulta um DataSet
         /// </summary>
         /// <param name="pComando"></param>
         /// <returns></returns>
-        DataSet IUnitOfWork.Consulta(string pComando) => new ConexaoBanco(_SqlTransaction, _SqlConnection).Consulta(pComando);
+        DataSet IUnitOfWork.Consulta(string pComando)
+        {
+            if (_SqlConnection.State == ConnectionState.Closed)
+            {
+                _SqlConnection = new SqlConnection(_connectionString);
+            }
+
+            return new ConexaoBanco(_SqlTransaction, _SqlConnection).Consulta(pComando);
+        }
 
         /// <summary>
         /// Monta a instrução de Inserção no banco a partir do objeto com os atributos
