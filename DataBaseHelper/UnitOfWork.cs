@@ -16,6 +16,12 @@ Data: 29/02/2020
 Programador: Pedro Henrique Pires
 Descrição: Refatoração da classe.
 */
+
+/*
+Data: 09/07/2020
+Programador: Pedro Henrique Pires
+Descrição: Ajuste para verificar se conexão está fechada.
+*/
 #endregion
 using DataBaseHelper.Interfaces;
 using System.Data;
@@ -78,7 +84,12 @@ namespace DataBaseHelper
         /// </summary>
         void IUnitOfWork.BeginTransaction()
         {
-            _SqlConnection.Open();
+            if (_SqlConnection.State == ConnectionState.Closed)
+            {
+                _SqlConnection = new SqlConnection(_connectionString);
+                _SqlConnection.Open();
+            }
+
             _SqlTransaction = _SqlConnection.BeginTransaction();
         }
 

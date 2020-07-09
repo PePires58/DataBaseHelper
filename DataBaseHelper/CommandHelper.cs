@@ -16,6 +16,12 @@ Data: 31/03/2020
 Programador: Pedro Henrique Pires
 Descrição: Inclusão de hora, minuto e segundo em campos de data.
 */
+
+/*
+Data: 03/06/2020
+Programador: Pedro Henrique Pires
+Descrição: Inclusão de ajustes para valores nulos.
+*/
 #endregion
 using DataBaseHelper.Atributos;
 using DataBaseHelper.Interfaces;
@@ -92,23 +98,23 @@ namespace DataBaseHelper
                             break;
                         case Enumerados.TipoDadosBanco.Char:
                             pStrBuilder.AppendLine($"DECLARE @{colunaModel[i].NomeColuna} CHAR");
-                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = '{colunaModel[i].ValorCampo.ToString()}'");
+                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = '{colunaModel[i]?.ValorCampo.ToString()}'");
                             break;
                         case Enumerados.TipoDadosBanco.Varchar:
                             pStrBuilder.AppendLine($"DECLARE @{colunaModel[i].NomeColuna} VARCHAR({colunaModel[i].TamanhoCampo})");
-                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = '{colunaModel[i].ValorCampo.ToString()}'");
+                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = {(colunaModel[i]?.ValorCampo == null ? "NULL": "'" + colunaModel[i]?.ValorCampo.ToString() + "'")}");
                             break;
                         case Enumerados.TipoDadosBanco.Tinyint:
                             pStrBuilder.AppendLine($"DECLARE @{colunaModel[i].NomeColuna} TINYINT");
-                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = {Convert.ToInt16(colunaModel[i].ValorCampo)}");
+                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = {(colunaModel[i].ValorCampo == null? "NULL":Convert.ToInt16(colunaModel[i].ValorCampo).ToString())}");
                             break;
                         case Enumerados.TipoDadosBanco.Integer:
                             pStrBuilder.AppendLine($"DECLARE @{colunaModel[i].NomeColuna} INTEGER");
-                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = {Convert.ToInt32(colunaModel[i].ValorCampo)}");
+                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = {(colunaModel[i].ValorCampo == null ? "NULL": Convert.ToInt32(colunaModel[i].ValorCampo).ToString())}");
                             break;
                         case Enumerados.TipoDadosBanco.BigInt:
                             pStrBuilder.AppendLine($"DECLARE @{colunaModel[i].NomeColuna} BIGINT");
-                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = {Convert.ToInt64(colunaModel[i].ValorCampo)}");
+                            pStrBuilder.AppendLine($"SET @{colunaModel[i].NomeColuna} = {(colunaModel[i].ValorCampo == null? "NULL": Convert.ToInt64(colunaModel[i].ValorCampo).ToString())}");
                             break;
                         case Enumerados.TipoDadosBanco.Float:
                             pStrBuilder.AppendLine($"DECLARE @{colunaModel[i].NomeColuna} FLOAT");
